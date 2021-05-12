@@ -1,0 +1,135 @@
+一、assimp 编译到 iOS 平台
+
+1、下载源码
+http://assimp.org/index.php/downloads
+https://github.com/assimp/assimp/releases/
+
+2、安装 cmake
+brew install cmake
+
+3、进入源码目录
+> cd assimp-5.0.0/port/iOS
+
+4、执行编译
+> ./build.sh --stdlib=libc++ --archs="arm64 x86_64"
+
+等待编译...
+
+5、编译成功
+[100%] Linking CXX static library ../lib/libassimp.a
+[100%] Built target assimp
+[!] Moving built static libraries into: ./lib/iOS/x86_64/
+[+] Creating fat binaries ...
+[!] Done! The fat binaries can be found at ./lib/iOS
+
+6、找到头文件和库文件
+头文件
+assimp-5.0.0/include
+库文件
+assimp-5.0.0/lib/iOS/libassimp-fat.a
+assimp-5.0.0/lib/iOS/libIrrXML-fat.a
+assimp-5.0.0/lib/iOS/libzlibstatic-fat.a
+
+
+二、assimp 编译到 MacOS 平台
+
+1、下载源码
+http://assimp.org/index.php/downloads
+https://github.com/assimp/assimp/releases/
+
+2、安装 cmake gui
+https://cmake.org/files/LatestRelease/
+找到 cmake-3.20.0-macos-universal.dmg 并下载和安装
+
+3、打开 cmake gui 工具，点击 "Browse Source" 选择源码目录，点击 "Browse Build" 选择构建目录，一般会选择源码目录下面的 build 目录（如果没有就新建一个）
+
+4、点击 "Configure" 选择 Xcode
+
+5、在生成的变量列表里面
+取消勾选 "BUILD_SHARED_LIBS"（如果你想构建动态库，那就保留这个选项是勾选状态)
+勾选 "ASSIMP_BUILD_ZLIB"
+找到 "CMAKE_OSX_ARCHITECTURES" 并填写 arm64 x86_64
+
+6、点击 "Open Project"，打开 Xcode 工程，Scheme 选择 "ALL_BUILD"
+
+7、切换 Run 的 Build Configuration 到 Release 然后编译工程
+头文件
+assimp-5.0.0/include
+库文件
+assimp-5.0.0/build/code/Release/libassimp.a
+assimp-5.0.0/build/contrib/irrXML/Release/libIrrXML.a
+assimp-5.0.0/build/contrib/zlib/Release/libzlibstatic.a
+
+
+三、建立全局库引用
+生成的库文件很大，差不多有 500M，所以并不适合放在工程里，可以放在 Mac 某个目录下，并建立全局库引用；
+
+1、新建 assimp 全局目录
+/usr/local/assimp/
+
+2、拷贝 assimp-5.0.0/include 到 /usr/local/assimp/include
+
+
+3、iOS: 拷贝 assimp-5.0.0/lib/iOS 到 /usr/local/assimp/lib/iOS
+3、OSX: 拷贝 assimp-5.0.0/build/**/*.a 到 /usr/local/assimp/lib/OSX
+
+
+四、集成到 Xcode 方法一
+1、打开 Xcode -> 选中 Targets -> 选中 Build Settings
+
+2、找到 Search Paths -> Header Search Paths，并添加路径
+/usr/local/assimp/include
+
+3、找到 Search Paths -> Library Search Paths，并添加路径
+iOS: /usr/local/assimp/lib/iOS
+OSX: /usr/local/assimp/lib/OSX
+
+4、打开 Xcode -> 选中 Targets -> 选中 Build Phases -> Link Binary With Libraries
+
+5、添加库文件
+iOS:
+/usr/local/assimp/lib/iOS/libassimp-fat.a
+/usr/local/assimp/lib/iOS/libIrrXML-fat.a
+/usr/local/assimp/lib/iOS/libzlibstatic-fat.a
+
+OSX:
+/usr/local/assimp/lib/OSX/libassimp.a
+/usr/local/assimp/lib/OSX/libIrrXML.a
+/usr/local/assimp/lib/OSX/libzlibstatic.a
+
+
+五、集成到 Xcode 方法二
+1、打开 Xcode -> Preferences -> Location -> Custom Paths
+
+2、添加变量
+ assimp_header,assimp_header,/usr/local/assimp/include
+ iOS: assimp_lib,assimp_lib,/usr/local/assimp/lib/iOS
+ OSX: assimp_lib,assimp_lib,/usr/local/assimp/lib/OSX
+
+3、打开 Xcode -> 选中 Targets -> 选中 Build Settings
+
+4、找到 Search Paths -> Header Search Paths，并添加路径
+${assimp_header}
+
+5、找到 Search Paths -> Library Search Paths，并添加路径
+${assimp_lib}
+
+6、打开 Xcode -> 选中 Targets -> 选中 Build Phases -> Link Binary With Libraries
+
+7、添加库文件
+iOS:
+/usr/local/assimp/lib/iOS/libassimp-fat.a
+/usr/local/assimp/lib/iOS/libIrrXML-fat.a
+/usr/local/assimp/lib/iOS/libzlibstatic-fat.a
+
+OSX:
+/usr/local/assimp/lib/OSX/libassimp.a
+/usr/local/assimp/lib/OSX/libIrrXML.a
+/usr/local/assimp/lib/OSX/libzlibstatic.a
+
+
+注意：
+1、在 Link Binary With Libraries 添加库文件时，如果找不到 usr 目录，可以按 Shift+Command+. 开显示隐藏目录
+
+
+

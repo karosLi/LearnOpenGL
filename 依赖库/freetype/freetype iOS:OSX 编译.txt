@@ -1,0 +1,15 @@
+1、设置代理
+export https_proxy=http://127.0.0.1:7890 http_proxy=http://127.0.0.1:7890 all_proxy=socks5://127.0.0.1:7890
+
+2、下载和安装 vcpkg
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh
+./vcpkg integrate install
+
+3、安装c/c++库
+./vcpkg install freetype --triplet=arm64-osx
+
+
+4、输出目录
+./packages
